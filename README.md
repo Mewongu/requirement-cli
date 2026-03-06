@@ -47,8 +47,22 @@ Data is stored in `.rcli/` as individual JSON files:
 - `.rcli/requirements/REQ-1.json` - one file per requirement
 - `.rcli/decisions/ADR-1.json` - one file per decision
 
-## Claude Code Integration
+## AI Coding Tool Integration
 
-This repo ships a [skill file](.claude/skills/rcli/SKILL.md) that gives Claude Code the `/rcli` command. When you clone this repo, the skill is available immediately.
+`rcli init` generates a Claude Code skill file by default. Use `--tool` to also generate instruction files for other AI coding tools:
 
-For other projects, run `rcli init --name "project-name"` to generate `.claude/skills/rcli/SKILL.md` in that project. The skill teaches Claude to use `rcli` commands automatically when you discuss requirements or decisions.
+```bash
+# Claude Code only (default)
+rcli init --name "my-project"
+
+# Multiple tools
+rcli init --name "my-project" --tool claude --tool codex --tool opencode
+```
+
+| Tool | Flag | Generated File |
+|------|------|----------------|
+| Claude Code | `--tool claude` | `.claude/skills/rcli/SKILL.md` |
+| OpenAI Codex | `--tool codex` | `AGENTS.md` |
+| OpenCode | `--tool opencode` | `OPENCODE.md` |
+
+All files contain the same core instructions. For `AGENTS.md` and `OPENCODE.md`, rcli merges its section into existing files using HTML comment markers, so other tool instructions are preserved.

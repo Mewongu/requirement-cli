@@ -1,12 +1,6 @@
-"""Skill file generator for Claude Code integration."""
+"""Skill file generator for Claude Code, OpenAI Codex, and OpenCode integration."""
 
-SKILL_CONTENT = r"""---
-name: rcli
-description: Manage project requirements and design decisions. Use when users discuss requirements, features, specs, or architectural decisions.
-user-invocable: true
----
-
-You are managing project requirements and design decisions using the `rcli` CLI tool.
+SHARED_INSTRUCTIONS = r"""You are managing project requirements and design decisions using the `rcli` CLI tool.
 
 ## Important Rules
 - Always use `--format json` for all commands so you can parse the output
@@ -19,6 +13,7 @@ You are managing project requirements and design decisions using the `rcli` CLI 
 ### Initialize
 ```bash
 rcli init --name "project-name"
+rcli init --name "project-name" --tool claude --tool codex --tool opencode
 ```
 
 ### Requirements
@@ -113,7 +108,58 @@ rcli status --format json
 6. Use labels to categorize (e.g., mvp, backend, frontend, security)
 """
 
+CLAUDE_FRONTMATTER = """---
+name: rcli
+description: Manage project requirements and design decisions. Use when users discuss requirements, features, specs, or architectural decisions.
+user-invocable: true
+---
+
+"""
+
+AGENTS_HEADER = """# rcli - Requirements Manager
+
+"""
+
+OPENCODE_HEADER = """# rcli - Requirements Manager
+
+"""
+
 
 def generate_skill_content() -> str:
-    """Return the skill file content."""
-    return SKILL_CONTENT.strip() + "\n"
+    """Return the Claude Code skill file content."""
+    return (CLAUDE_FRONTMATTER + SHARED_INSTRUCTIONS).strip() + "\n"
+
+
+def generate_agents_content() -> str:
+    """Return the AGENTS.md content for OpenAI Codex."""
+    return (AGENTS_HEADER + SHARED_INSTRUCTIONS).strip() + "\n"
+
+
+def generate_opencode_content() -> str:
+    """Return the OPENCODE.md content for OpenCode."""
+    return (OPENCODE_HEADER + SHARED_INSTRUCTIONS).strip() + "\n"
+
+
+SECTION_MARKER_START = "<!-- rcli:start -->"
+SECTION_MARKER_END = "<!-- rcli:end -->"
+
+
+def merge_into_existing(existing: str, new_section: str) -> str:
+    """Merge rcli section into an existing file, replacing previous rcli content if present."""
+    wrapped = f"{SECTION_MARKER_START}\n{new_section.strip()}\n{SECTION_MARKER_END}\n"
+
+    if SECTION_MARKER_START in existing:
+        start = existing.index(SECTION_MARKER_START)
+        end = existing.index(SECTION_MARKER_END) + len(SECTION_MARKER_END)
+        # Consume trailing newline if present
+        if end < len(existing) and existing[end] == "\n":
+            end += 1
+        return existing[:start] + wrapped + existing[end:]
+
+    # Append to end
+    separator = "\n" if existing and not existing.endswith("\n\n") else ""
+    if existing and not existing.endswith("\n"):
+        separator = "\n\n"
+    elif existing and existing.endswith("\n") and not existing.endswith("\n\n"):
+        separator = "\n"
+    return existing + separator + wrapped
