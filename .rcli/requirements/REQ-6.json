@@ -1,0 +1,15 @@
+{
+  "id": "REQ-6",
+  "title": "Multiple Output Formats",
+  "description": "Support table, JSON, markdown, and HTML output formats via --format flag.",
+  "status": "implemented",
+  "priority": "high",
+  "parent": null,
+  "labels": [
+    "core",
+    "formatters"
+  ],
+  "metadata": {},
+  "created_at": "2026-03-03T08:49:19.912517+00:00",
+  "updated_at": "2026-03-03T08:49:19.912517+00:00"
+}

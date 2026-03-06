@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:click.palletsprojects.com)",
+      "WebFetch(domain:rich.readthedocs.io)",
+      "Bash(git init:*)",
+      "Bash(python3:*)",
+      "Bash(source:*)",
+      "Bash(git mv:*)"
+    ]
+  }
+}

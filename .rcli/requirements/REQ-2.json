@@ -1,0 +1,15 @@
+{
+  "id": "REQ-2",
+  "title": "JSON File Storage",
+  "description": "All data is stored as individual JSON files in .rcli/ for git merge-friendliness.",
+  "status": "implemented",
+  "priority": "critical",
+  "parent": null,
+  "labels": [
+    "core",
+    "storage"
+  ],
+  "metadata": {},
+  "created_at": "2026-03-03T08:49:19.678159+00:00",
+  "updated_at": "2026-03-03T08:49:19.678159+00:00"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "REQ-9",
+  "title": "Monotonic IDs",
+  "description": "ID counters are monotonic (never decremented) to prevent ID reuse after deletion.",
+  "status": "implemented",
+  "priority": "critical",
+  "parent": "REQ-2",
+  "labels": [
+    "core",
+    "storage"
+  ],
+  "metadata": {},
+  "created_at": "2026-03-03T08:49:20.085404+00:00",
+  "updated_at": "2026-03-03T08:49:20.085404+00:00"
+}

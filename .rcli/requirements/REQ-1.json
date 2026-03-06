@@ -1,0 +1,15 @@
+{
+  "id": "REQ-1",
+  "title": "CLI Interface",
+  "description": "The tool provides a CLI (rcli) for managing requirements and decisions with full CRUD operations.",
+  "status": "implemented",
+  "priority": "critical",
+  "parent": null,
+  "labels": [
+    "core",
+    "cli"
+  ],
+  "metadata": {},
+  "created_at": "2026-03-03T08:48:30.924368+00:00",
+  "updated_at": "2026-03-03T08:48:30.924368+00:00"
+}

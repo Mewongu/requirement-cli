@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "project_name": "rcli",
+  "counters": {
+    "REQ": 10
+  },
+  "default_requirement_prefix": "REQ",
+  "default_decision_prefix": "ADR"
+}

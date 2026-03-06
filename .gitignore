@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.venv/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+# .rcli/  # tracked in this project since it contains rcli's own requirements

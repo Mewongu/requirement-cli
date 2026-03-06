@@ -1,0 +1,15 @@
+{
+  "id": "REQ-4",
+  "title": "Design Decisions",
+  "description": "ADR-style decision records linked to requirements.",
+  "status": "implemented",
+  "priority": "high",
+  "parent": "REQ-1",
+  "labels": [
+    "core",
+    "cli"
+  ],
+  "metadata": {},
+  "created_at": "2026-03-03T08:49:19.796150+00:00",
+  "updated_at": "2026-03-03T08:49:19.796150+00:00"
+}
