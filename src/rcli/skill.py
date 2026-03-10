@@ -29,15 +29,18 @@ rcli init --name "project-name" --skill-dir .claude/skills
 ```bash
 # Add a requirement
 rcli req add "Title" --description "Details" --priority high --label mvp
+rcli req add "Title" --depends-on REQ-1 --depends-on REQ-2
 
 # Add via --json (inline or stdin with '-')
 rcli req add --json '{"title":"Title","priority":"high","labels":["mvp"]}'
+rcli req add --json '{"title":"Title","depends_on":["REQ-1","REQ-2"]}'
 echo '{"title":"Title"}' | rcli req add --json -
 
 # List requirements (with filters)
 rcli req list
 rcli req list --status draft --status approved --label mvp
 rcli req list --orphans
+rcli req list --depends-on REQ-1   # direct dependents only
 
 # Show a single requirement
 rcli req show REQ-1
@@ -46,16 +49,20 @@ rcli req show REQ-1
 rcli req edit REQ-1 --status approved
 rcli req edit REQ-1 --add-label backend --remove-label draft
 rcli req edit REQ-1 --parent REQ-2
+rcli req edit REQ-1 --add-dep REQ-2 --remove-dep REQ-3
 
-# Edit via --json (replaces labels/metadata entirely)
+# Edit via --json (replaces labels/depends_on/metadata entirely)
 rcli req edit REQ-1 --json '{"status":"approved","labels":["backend"]}'
 
 # Delete a requirement
 rcli req delete REQ-1
 
-# Show requirement tree
+# Show requirement tree (parent-child hierarchy)
 rcli req tree
 rcli req tree REQ-1
+
+# Show dependency graph (depends_on relationships)
+rcli req graph
 ```
 
 ### Decisions
@@ -84,12 +91,25 @@ rcli decision edit ADR-1 --json '{"status":"obsolete","linked_requirements":["RE
 rcli decision delete ADR-1
 ```
 
+### Impact Analysis
+```bash
+# Show all requirements that depend on REQ-X (direct + transitive)
+rcli impact REQ-1
+```
+
+### Lint
+```bash
+# Check for structural issues: dependency cycles, dangling references
+# Exits non-zero if issues found
+rcli lint
+```
+
 ### JSON Input (`--json`)
 The `add` and `edit` commands accept `--json` with an inline JSON object or `-` for stdin.
 - CLI flags override JSON values when both are provided
 - Unknown JSON keys are silently ignored
-- For `edit`, JSON `labels`/`linked_requirements`/`metadata` **replace** existing values (PUT semantics)
-- CLI `--add-label`/`--remove-label`/`--add-link`/`--remove-link` take precedence over JSON lists
+- For `edit`, JSON `labels`/`linked_requirements`/`depends_on`/`metadata` **replace** existing values (PUT semantics)
+- CLI `--add-label`/`--remove-label`/`--add-link`/`--remove-link`/`--add-dep`/`--remove-dep` take precedence over JSON lists
 
 ### Search
 ```bash
@@ -116,6 +136,8 @@ rcli status
 4. Link decisions to the requirements they address
 5. Update requirement status as implementation progresses
 6. Use labels to categorize (e.g., mvp, backend, frontend, security)
+7. Use `--depends-on` to express lateral dependencies between requirements (A depends on B means B must be satisfied first)
+8. Run `rcli lint` to check for cycles or dangling references after bulk edits
 """
 
 
