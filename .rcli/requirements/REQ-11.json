@@ -1,0 +1,12 @@
+{
+  "id": "REQ-11",
+  "title": "Allow specifying a custom ID when adding a requirement",
+  "description": "Users should be able to provide a custom ID when adding a requirement instead of relying solely on auto-incremented IDs. If a custom ID is provided, it should be used as-is; otherwise, the system falls back to auto-increment.",
+  "status": "draft",
+  "priority": "medium",
+  "parent": null,
+  "labels": [],
+  "metadata": {},
+  "created_at": "2026-03-10T09:23:08.182157+00:00",
+  "updated_at": "2026-03-10T09:23:08.182157+00:00"
+}

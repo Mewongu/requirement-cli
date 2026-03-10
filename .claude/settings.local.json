@@ -6,7 +6,10 @@
       "Bash(git init:*)",
       "Bash(python3:*)",
       "Bash(source:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(git status:*)",
+      "Bash(git push:*)",
+      "Bash(source .venv/bin/activate 2>/dev/null || true && which rcli || python -m rcli --help 2>&1 | head -5)"
     ]
   }
 }
