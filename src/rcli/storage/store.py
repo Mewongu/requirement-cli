@@ -67,7 +67,11 @@ class Store:
     def _list_items(self, directory: Path, model_class) -> list:
         if not directory.exists():
             return []
-        return [model_class.from_dict(json.load(open(f))) for f in sorted(directory.glob("*.json"))]
+        items = []
+        for f in sorted(directory.glob("*.json")):
+            with open(f) as fh:
+                items.append(model_class.from_dict(json.load(fh)))
+        return items
 
     def list_requirements(self) -> list[Requirement]:
         return self._list_items(paths.requirements_dir(self.root), Requirement)
