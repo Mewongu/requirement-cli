@@ -1,0 +1,15 @@
+{
+  "id": "ADR-1",
+  "title": "Default output format is JSON",
+  "context": "The tool is used both interactively by humans and programmatically by AI agents (e.g. Claude Code via the rcli skill). A single default must be chosen for the --format flag.",
+  "decision": "Default --format to 'json' rather than 'table'.",
+  "rationale": "AI agents consume structured output reliably without needing --format json on every call. Humans can override to table/markdown/html when needed. JSON is also machine-readable by shell scripts. The table format (Rich) is still fully available.",
+  "status": "active",
+  "linked_requirements": [
+    "REQ-6",
+    "REQ-8"
+  ],
+  "metadata": {},
+  "created_at": "2026-03-10T13:28:00.500162+00:00",
+  "updated_at": "2026-03-10T13:28:00.500162+00:00"
+}
