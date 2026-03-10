@@ -7,7 +7,7 @@ user-invocable: true
 You are managing project requirements and design decisions using the `rcli` CLI tool.
 
 ## Important Rules
-- Always use `--format json` for all commands so you can parse the output
+- Output defaults to JSON — no need to pass `--format json` unless overriding
 - If there is no `.rcli/` directory, run `rcli init --name "PROJECT_NAME"` first
 - Search before creating to avoid duplicates
 - Keep requirements and decisions up to date as the project evolves
@@ -24,59 +24,59 @@ rcli init --name "project-name" --skill-dir .claude/skills
 ### Requirements
 ```bash
 # Add a requirement
-rcli req add "Title" --description "Details" --priority high --label mvp --format json
+rcli req add "Title" --description "Details" --priority high --label mvp
 
 # Add via --json (inline or stdin with '-')
-rcli req add --json '{"title":"Title","priority":"high","labels":["mvp"]}' --format json
-echo '{"title":"Title"}' | rcli req add --json - --format json
+rcli req add --json '{"title":"Title","priority":"high","labels":["mvp"]}'
+echo '{"title":"Title"}' | rcli req add --json -
 
 # List requirements (with filters)
-rcli req list --format json
-rcli req list --status draft --status approved --label mvp --format json
-rcli req list --orphans --format json
+rcli req list
+rcli req list --status draft --status approved --label mvp
+rcli req list --orphans
 
 # Show a single requirement
-rcli req show REQ-1 --format json
+rcli req show REQ-1
 
 # Edit a requirement
-rcli req edit REQ-1 --status approved --format json
-rcli req edit REQ-1 --add-label backend --remove-label draft --format json
-rcli req edit REQ-1 --parent REQ-2 --format json
+rcli req edit REQ-1 --status approved
+rcli req edit REQ-1 --add-label backend --remove-label draft
+rcli req edit REQ-1 --parent REQ-2
 
 # Edit via --json (replaces labels/metadata entirely)
-rcli req edit REQ-1 --json '{"status":"approved","labels":["backend"]}' --format json
+rcli req edit REQ-1 --json '{"status":"approved","labels":["backend"]}'
 
 # Delete a requirement
-rcli req delete REQ-1 --format json
+rcli req delete REQ-1
 
 # Show requirement tree
-rcli req tree --format json
-rcli req tree REQ-1 --format json
+rcli req tree
+rcli req tree REQ-1
 ```
 
 ### Decisions
 ```bash
 # Add a decision
-rcli decision add "Title" --context "Why" --decision "What" --rationale "Because" --link REQ-1 --format json
+rcli decision add "Title" --context "Why" --decision "What" --rationale "Because" --link REQ-1
 
 # Add via --json
-rcli decision add --json '{"title":"Title","context":"Why","decision":"What","linked_requirements":["REQ-1"]}' --format json
+rcli decision add --json '{"title":"Title","context":"Why","decision":"What","linked_requirements":["REQ-1"]}'
 
 # List decisions
-rcli decision list --format json
-rcli decision list --status active --format json
+rcli decision list
+rcli decision list --status active
 
 # Show a decision
-rcli decision show ADR-1 --format json
+rcli decision show ADR-1
 
 # Edit a decision
-rcli decision edit ADR-1 --status obsolete --format json
+rcli decision edit ADR-1 --status obsolete
 
 # Edit via --json (replaces linked_requirements/metadata entirely)
-rcli decision edit ADR-1 --json '{"status":"obsolete","linked_requirements":["REQ-2"]}' --format json
+rcli decision edit ADR-1 --json '{"status":"obsolete","linked_requirements":["REQ-2"]}'
 
 # Delete a decision
-rcli decision delete ADR-1 --format json
+rcli decision delete ADR-1
 ```
 
 ### JSON Input (`--json`)
@@ -88,20 +88,20 @@ The `add` and `edit` commands accept `--json` with an inline JSON object or `-` 
 
 ### Search
 ```bash
-rcli search "query" --format json
-rcli search "query" --type req --format json
+rcli search "query"
+rcli search "query" --type req
 ```
 
 ### Export
 ```bash
 rcli export --format markdown --output requirements.md
 rcli export --format html --output requirements.html
-rcli export --type req --status approved --format json
+rcli export --type req --status approved
 ```
 
 ### Status Dashboard
 ```bash
-rcli status --format json
+rcli status
 ```
 
 ## Workflow Guidelines
