@@ -7,7 +7,10 @@ from datetime import datetime, timezone
 import click
 
 from rcli.cli import get_formatter, get_store, error_exit
-from rcli.commands.json_input import parse_json_input, _pick
+from rcli.commands.json_input import (
+    parse_json_input, _pick,
+    parse_metadata, apply_metadata_edits, apply_list_edits, validate_enum,
+)
 from rcli.models.requirement import Requirement, VALID_STATUSES, VALID_PRIORITIES
 from rcli.search_engine import filter_items
 
@@ -46,11 +49,9 @@ def req_add(ctx: click.Context, title: str | None, description: str | None,
     final_parent = _pick(parent, json_data, "parent")
 
     # Validate enum values that may come from JSON (Click only validates CLI-sourced values)
-    if final_status not in VALID_STATUSES:
-        error_exit(ctx, f"Invalid status '{final_status}'. Choose from: {', '.join(VALID_STATUSES)}.")
+    if not validate_enum(final_status, VALID_STATUSES, "status", ctx):
         return
-    if final_priority not in VALID_PRIORITIES:
-        error_exit(ctx, f"Invalid priority '{final_priority}'. Choose from: {', '.join(VALID_PRIORITIES)}.")
+    if not validate_enum(final_priority, VALID_PRIORITIES, "priority", ctx):
         return
 
     store = get_store(ctx)
@@ -61,15 +62,9 @@ def req_add(ctx: click.Context, title: str | None, description: str | None,
     # Labels: CLI flags win, else JSON, else empty
     final_labels = list(label) if label else (json_data.get("labels", []) if json_data else [])
 
-    meta_dict = {}
-    if json_data and "metadata" in json_data:
-        meta_dict.update(json_data["metadata"])
-    for m in meta:
-        if "=" not in m:
-            error_exit(ctx, f"Invalid metadata format: {m}. Use KEY=VALUE.")
-            return
-        k, v = m.split("=", 1)
-        meta_dict[k] = v
+    meta_dict = parse_metadata(meta, json_data, ctx)
+    if meta_dict is None:
+        return
 
     requirement = Requirement(
         id=req_id,
@@ -165,14 +160,12 @@ def req_edit(ctx: click.Context, id: str, title: str | None, description: str | 
         requirement.description = new_desc
     new_status = _pick(status, json_data, "status")
     if new_status is not None:
-        if new_status not in VALID_STATUSES:
-            error_exit(ctx, f"Invalid status '{new_status}'. Choose from: {', '.join(VALID_STATUSES)}.")
+        if not validate_enum(new_status, VALID_STATUSES, "status", ctx):
             return
         requirement.status = new_status
     new_priority = _pick(priority, json_data, "priority")
     if new_priority is not None:
-        if new_priority not in VALID_PRIORITIES:
-            error_exit(ctx, f"Invalid priority '{new_priority}'. Choose from: {', '.join(VALID_PRIORITIES)}.")
+        if not validate_enum(new_priority, VALID_PRIORITIES, "priority", ctx):
             return
         requirement.priority = new_priority
     new_parent = _pick(parent, json_data, "parent")
@@ -183,27 +176,15 @@ def req_edit(ctx: click.Context, id: str, title: str | None, description: str | 
 
     # Labels: CLI --add-label/--remove-label win; else JSON replaces list
     if add_label or remove_label:
-        for lbl in add_label:
-            if lbl not in requirement.labels:
-                requirement.labels.append(lbl)
-        for lbl in remove_label:
-            if lbl in requirement.labels:
-                requirement.labels.remove(lbl)
+        apply_list_edits(requirement.labels, add_label, remove_label)
     elif json_data and "labels" in json_data:
         requirement.labels = list(json_data["labels"])
 
     # Metadata: CLI --set-meta/--remove-meta win; else JSON replaces dict
-    if set_meta or remove_meta:
-        for m in set_meta:
-            if "=" not in m:
-                error_exit(ctx, f"Invalid metadata format: {m}. Use KEY=VALUE.")
-                return
-            k, v = m.split("=", 1)
-            requirement.metadata[k] = v
-        for k in remove_meta:
-            requirement.metadata.pop(k, None)
-    elif json_data and "metadata" in json_data:
-        requirement.metadata = dict(json_data["metadata"])
+    result = apply_metadata_edits(requirement.metadata, set_meta, remove_meta, json_data, ctx)
+    if result is None:
+        return
+    requirement.metadata = result
 
     requirement.updated_at = datetime.now(timezone.utc).isoformat()
     store.save_requirement(requirement)

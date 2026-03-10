@@ -47,3 +47,70 @@ def _pick(cli_value: object, json_data: dict | None, key: str, default: object =
     if json_data is not None and key in json_data:
         return json_data[key]
     return default
+
+
+def _parse_kv_meta(meta: tuple, ctx: click.Context) -> dict | None:
+    """Parse KEY=VALUE pairs into a dict. Returns None (after error_exit) on bad format."""
+    result: dict = {}
+    for m in meta:
+        if "=" not in m:
+            from rcli.cli import error_exit
+            error_exit(ctx, f"Invalid metadata format: {m}. Use KEY=VALUE.")
+            return None
+        k, v = m.split("=", 1)
+        result[k] = v
+    return result
+
+
+def parse_metadata(meta: tuple, json_data: dict | None, ctx: click.Context) -> dict | None:
+    """Build metadata dict from JSON base + CLI KEY=VALUE overrides.
+    Returns None (after error_exit) on invalid format."""
+    meta_dict: dict = {}
+    if json_data and "metadata" in json_data:
+        meta_dict.update(json_data["metadata"])
+    parsed = _parse_kv_meta(meta, ctx)
+    if parsed is None:
+        return None
+    meta_dict.update(parsed)
+    return meta_dict
+
+
+def apply_metadata_edits(
+    existing: dict,
+    set_meta: tuple,
+    remove_meta: tuple,
+    json_data: dict | None,
+    ctx: click.Context,
+) -> dict | None:
+    """Apply CLI mutations or JSON replacement to a metadata dict.
+    Returns updated dict, or None (after error_exit) on parse error."""
+    if set_meta or remove_meta:
+        parsed = _parse_kv_meta(set_meta, ctx)
+        if parsed is None:
+            return None
+        existing.update(parsed)
+        for k in remove_meta:
+            existing.pop(k, None)
+        return existing
+    if json_data and "metadata" in json_data:
+        return dict(json_data["metadata"])
+    return existing
+
+
+def apply_list_edits(items: list, add: tuple, remove: tuple) -> None:
+    """Add/remove items in a list in-place."""
+    for item in add:
+        if item not in items:
+            items.append(item)
+    for item in remove:
+        if item in items:
+            items.remove(item)
+
+
+def validate_enum(value: str, valid_values: list[str], field_name: str, ctx: click.Context) -> bool:
+    """Return True if valid; call error_exit and return False if not."""
+    if value not in valid_values:
+        from rcli.cli import error_exit
+        error_exit(ctx, f"Invalid {field_name} '{value}'. Choose from: {', '.join(valid_values)}.")
+        return False
+    return True

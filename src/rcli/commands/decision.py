@@ -7,7 +7,10 @@ from datetime import datetime, timezone
 import click
 
 from rcli.cli import get_formatter, get_store, error_exit
-from rcli.commands.json_input import parse_json_input, _pick
+from rcli.commands.json_input import (
+    parse_json_input, _pick,
+    parse_metadata, apply_metadata_edits, apply_list_edits, validate_enum,
+)
 from rcli.models.decision import Decision, VALID_STATUSES
 from rcli.search_engine import filter_items
 
@@ -45,8 +48,7 @@ def decision_add(ctx: click.Context, title: str | None, context: str | None,
     final_rationale = _pick(rationale, json_data, "rationale", "")
     final_status = _pick(status, json_data, "status", "active")
 
-    if final_status not in VALID_STATUSES:
-        error_exit(ctx, f"Invalid status '{final_status}'. Choose from: {', '.join(VALID_STATUSES)}.")
+    if not validate_enum(final_status, VALID_STATUSES, "status", ctx):
         return
 
     store = get_store(ctx)
@@ -57,15 +59,9 @@ def decision_add(ctx: click.Context, title: str | None, context: str | None,
     # Linked requirements: CLI flags win, else JSON, else empty
     final_links = list(link) if link else (json_data.get("linked_requirements", []) if json_data else [])
 
-    meta_dict = {}
-    if json_data and "metadata" in json_data:
-        meta_dict.update(json_data["metadata"])
-    for m in meta:
-        if "=" not in m:
-            error_exit(ctx, f"Invalid metadata format: {m}. Use KEY=VALUE.")
-            return
-        k, v = m.split("=", 1)
-        meta_dict[k] = v
+    meta_dict = parse_metadata(meta, json_data, ctx)
+    if meta_dict is None:
+        return
 
     dec = Decision(
         id=dec_id,
@@ -159,34 +155,21 @@ def decision_edit(ctx: click.Context, id: str, title: str | None, context: str |
         dec.rationale = new_rationale
     new_status = _pick(status, json_data, "status")
     if new_status is not None:
-        if new_status not in VALID_STATUSES:
-            error_exit(ctx, f"Invalid status '{new_status}'. Choose from: {', '.join(VALID_STATUSES)}.")
+        if not validate_enum(new_status, VALID_STATUSES, "status", ctx):
             return
         dec.status = new_status
 
     # Linked requirements: CLI --add-link/--remove-link win; else JSON replaces list
     if add_link or remove_link:
-        for lnk in add_link:
-            if lnk not in dec.linked_requirements:
-                dec.linked_requirements.append(lnk)
-        for lnk in remove_link:
-            if lnk in dec.linked_requirements:
-                dec.linked_requirements.remove(lnk)
+        apply_list_edits(dec.linked_requirements, add_link, remove_link)
     elif json_data and "linked_requirements" in json_data:
         dec.linked_requirements = list(json_data["linked_requirements"])
 
     # Metadata: CLI --set-meta/--remove-meta win; else JSON replaces dict
-    if set_meta or remove_meta:
-        for m in set_meta:
-            if "=" not in m:
-                error_exit(ctx, f"Invalid metadata format: {m}. Use KEY=VALUE.")
-                return
-            k, v = m.split("=", 1)
-            dec.metadata[k] = v
-        for k in remove_meta:
-            dec.metadata.pop(k, None)
-    elif json_data and "metadata" in json_data:
-        dec.metadata = dict(json_data["metadata"])
+    result = apply_metadata_edits(dec.metadata, set_meta, remove_meta, json_data, ctx)
+    if result is None:
+        return
+    dec.metadata = result
 
     dec.updated_at = datetime.now(timezone.utc).isoformat()
     store.save_decision(dec)
