@@ -1,0 +1,14 @@
+{
+  "id": "REQ-12",
+  "title": "JSON input uses PUT semantics for collections; CLI flags use PATCH semantics",
+  "description": "When --json provides labels, linked_requirements, or metadata, those values replace the existing collection entirely (PUT). When CLI flags like --add-label, --remove-label, --add-link, --remove-link, --set-meta, or --remove-meta are used, they mutate the existing collection in place (PATCH). CLI flags take precedence over --json when both are supplied.",
+  "status": "approved",
+  "priority": "medium",
+  "parent": null,
+  "labels": [
+    "design"
+  ],
+  "metadata": {},
+  "created_at": "2026-03-10T13:30:36.284764+00:00",
+  "updated_at": "2026-03-10T13:30:36.284764+00:00"
+}
