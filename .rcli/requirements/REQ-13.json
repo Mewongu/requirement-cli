@@ -1,0 +1,14 @@
+{
+  "id": "REQ-13",
+  "title": "decision list supports --link filter to match by linked requirement ID",
+  "description": "rcli decision list accepts one or more --link flags to filter decisions whose linked_requirements list contains any of the given IDs. The filter is OR'd (any match). This replaces the broken --label option that was silently ignored.",
+  "status": "approved",
+  "priority": "medium",
+  "parent": null,
+  "labels": [
+    "design"
+  ],
+  "metadata": {},
+  "created_at": "2026-03-10T13:35:15.257822+00:00",
+  "updated_at": "2026-03-10T13:35:15.257822+00:00"
+}
