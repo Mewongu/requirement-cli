@@ -64,15 +64,13 @@ class Store:
         p = paths.requirement_path(self.root, req_id)
         p.unlink()
 
-    def list_requirements(self) -> list[Requirement]:
-        req_dir = paths.requirements_dir(self.root)
-        if not req_dir.exists():
+    def _list_items(self, directory: Path, model_class) -> list:
+        if not directory.exists():
             return []
-        reqs = []
-        for f in sorted(req_dir.glob("*.json")):
-            with open(f) as fh:
-                reqs.append(Requirement.from_dict(json.load(fh)))
-        return reqs
+        return [model_class.from_dict(json.load(open(f))) for f in sorted(directory.glob("*.json"))]
+
+    def list_requirements(self) -> list[Requirement]:
+        return self._list_items(paths.requirements_dir(self.root), Requirement)
 
     # -- Decisions --
 
@@ -92,11 +90,4 @@ class Store:
         p.unlink()
 
     def list_decisions(self) -> list[Decision]:
-        dec_dir = paths.decisions_dir(self.root)
-        if not dec_dir.exists():
-            return []
-        decs = []
-        for f in sorted(dec_dir.glob("*.json")):
-            with open(f) as fh:
-                decs.append(Decision.from_dict(json.load(fh)))
-        return decs
+        return self._list_items(paths.decisions_dir(self.root), Decision)
