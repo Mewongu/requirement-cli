@@ -28,6 +28,8 @@ class MarkdownFormatter:
             lines.append(f"- **Parent:** {req.parent}")
         if req.labels:
             lines.append(f"- **Labels:** {', '.join(req.labels)}")
+        if req.depends_on:
+            lines.append(f"- **Depends On:** {', '.join(req.depends_on)}")
         if req.description:
             lines.extend(["", req.description])
         if req.metadata:
@@ -95,6 +97,27 @@ class MarkdownFormatter:
             for key, val in section_data.items():
                 lines.append(f"- {key}: {val}")
             lines.append("")
+        sys.stdout.write("\n".join(lines))
+
+    def output_graph(self, requirements: list) -> None:
+        deps = [r for r in requirements if r.depends_on]
+        lines = ["# Dependency Graph", ""]
+        if not deps:
+            lines.append("_No dependencies defined._")
+        else:
+            for req in deps:
+                lines.append(f"- **{req.id}** ({req.title}) depends on: {', '.join(req.depends_on)}")
+        lines.append("")
+        sys.stdout.write("\n".join(lines))
+
+    def output_lint(self, issues: list[dict]) -> None:
+        lines = ["# Lint Issues", ""]
+        if not issues:
+            lines.append("No issues found.")
+        else:
+            for issue in issues:
+                lines.append(f"- **{issue['type']}**: {issue['message']}")
+        lines.append("")
         sys.stdout.write("\n".join(lines))
 
     def output_message(self, message: str, data: object | None = None) -> None:

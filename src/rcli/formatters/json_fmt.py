@@ -35,6 +35,18 @@ class JsonFormatter:
     def output_export(self, data: dict) -> str:
         return json.dumps(data, indent=2) + "\n"
 
+    def output_graph(self, requirements: list) -> None:
+        data = [
+            {"id": r.id, "title": r.title, "depends_on": r.depends_on}
+            for r in requirements if r.depends_on
+        ]
+        json.dump(data, sys.stdout, indent=2)
+        sys.stdout.write("\n")
+
+    def output_lint(self, issues: list[dict]) -> None:
+        json.dump(issues, sys.stdout, indent=2)
+        sys.stdout.write("\n")
+
     def output_message(self, message: str, data: object | None = None) -> None:
         out: dict = {"message": message}
         if data is not None:

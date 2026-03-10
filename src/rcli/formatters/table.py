@@ -51,6 +51,8 @@ class TableFormatter:
             lines.append(f"[bold]Parent:[/bold] {req.parent}")
         if req.labels:
             lines.append(f"[bold]Labels:[/bold] {', '.join(req.labels)}")
+        if req.depends_on:
+            lines.append(f"[bold]Depends On:[/bold] {', '.join(req.depends_on)}")
         if req.description:
             lines.append(f"\n[bold]Description:[/bold]\n{req.description}")
         if req.metadata:
@@ -98,12 +100,14 @@ class TableFormatter:
         table.add_column("Priority")
         table.add_column("Parent")
         table.add_column("Labels")
+        table.add_column("Depends On")
         for req in reqs:
             status = Text(req.status, style=STATUS_COLORS.get(req.status, ""))
             priority = Text(req.priority, style=PRIORITY_COLORS.get(req.priority, ""))
             table.add_row(
                 req.id, req.title, status, priority,
                 req.parent or "", ", ".join(req.labels),
+                ", ".join(req.depends_on),
             )
         console.print(table)
 
@@ -169,6 +173,30 @@ class TableFormatter:
             console.print(f"\n  [bold]{section_name}:[/bold]")
             for key, val in section_data.items():
                 console.print(f"    {key}: {val}")
+
+    def output_graph(self, requirements: list) -> None:
+        deps = [r for r in requirements if r.depends_on]
+        if not deps:
+            console.print("[dim]No dependencies defined.[/dim]")
+            return
+        table = Table(title="Dependency Graph")
+        table.add_column("ID", style="bold")
+        table.add_column("Title")
+        table.add_column("Depends On")
+        for req in deps:
+            table.add_row(req.id, req.title, ", ".join(req.depends_on))
+        console.print(table)
+
+    def output_lint(self, issues: list[dict]) -> None:
+        if not issues:
+            console.print("[green]No issues found.[/green]")
+            return
+        table = Table(title="Lint Issues")
+        table.add_column("Type", style="bold")
+        table.add_column("Message")
+        for issue in issues:
+            table.add_row(issue["type"], issue["message"])
+        console.print(table)
 
     def output_message(self, message: str, data: object | None = None) -> None:
         console.print(message)

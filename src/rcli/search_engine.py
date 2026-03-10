@@ -43,6 +43,7 @@ def filter_items(
     priorities: list[str] | None = None,
     orphans: bool = False,
     links: list[str] | None = None,
+    depends_on_ids: list[str] | None = None,
 ) -> list:
     """Filter items. Multiple values within a type are OR'd, across types are AND'd."""
     result = items
@@ -52,6 +53,8 @@ def filter_items(
         result = [i for i in result if hasattr(i, "labels") and any(l in i.labels for l in labels)]
     if links:
         result = [i for i in result if hasattr(i, "linked_requirements") and any(l in i.linked_requirements for l in links)]
+    if depends_on_ids:
+        result = [i for i in result if hasattr(i, "depends_on") and any(d in i.depends_on for d in depends_on_ids)]
     if prefix:
         result = [i for i in result if i.id.startswith(prefix + "-")]
     if parent is not None:
@@ -60,6 +63,58 @@ def filter_items(
         result = [i for i in result if hasattr(i, "priority") and i.priority in priorities]
     if orphans:
         result = [i for i in result if hasattr(i, "parent") and i.parent is None]
+    return result
+
+
+def find_cycles(requirements: list) -> list[list[str]]:
+    """Find cycles in the depends_on graph using DFS. Returns list of cycles (each a list of IDs)."""
+    graph: dict[str, list[str]] = {r.id: list(r.depends_on) for r in requirements}
+
+    WHITE, GRAY, BLACK = 0, 1, 2
+    color: dict[str, int] = {nid: WHITE for nid in graph}
+    cycles: list[list[str]] = []
+
+    def dfs(node: str, path: list[str]) -> None:
+        color[node] = GRAY
+        path.append(node)
+        for neighbor in graph.get(node, []):
+            if neighbor not in color:
+                continue  # dangling external reference
+            if color[neighbor] == GRAY:
+                idx = path.index(neighbor)
+                cycles.append(path[idx:] + [neighbor])
+            elif color[neighbor] == WHITE:
+                dfs(neighbor, path)
+        path.pop()
+        color[node] = BLACK
+
+    for req_id in list(graph.keys()):
+        if color[req_id] == WHITE:
+            dfs(req_id, [])
+
+    return cycles
+
+
+def find_impacted(requirements: list, target_id: str) -> list:
+    """BFS reverse traversal: find all requirements that directly or transitively depend on target_id."""
+    reverse: dict[str, list[str]] = {}
+    req_by_id: dict[str, object] = {}
+    for req in requirements:
+        req_by_id[req.id] = req
+        for dep in req.depends_on:
+            reverse.setdefault(dep, []).append(req.id)
+
+    result = []
+    visited: set[str] = set()
+    queue = deque([target_id])
+    while queue:
+        current = queue.popleft()
+        for dependent_id in reverse.get(current, []):
+            if dependent_id not in visited:
+                visited.add(dependent_id)
+                if dependent_id in req_by_id:
+                    result.append(req_by_id[dependent_id])
+                queue.append(dependent_id)
     return result
 
 

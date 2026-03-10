@@ -2,13 +2,14 @@
   "id": "REQ-18",
   "title": "rcli req graph command",
   "description": "rcli req graph visualises the dependency DAG. Separate from rcli req tree which shows the parent-child hierarchy.",
-  "status": "draft",
+  "status": "implemented",
   "priority": "low",
   "parent": null,
   "labels": [
     "cli"
   ],
+  "depends_on": [],
   "metadata": {},
   "created_at": "2026-03-10T20:32:44.248751+00:00",
-  "updated_at": "2026-03-10T20:32:44.248751+00:00"
+  "updated_at": "2026-03-10T21:28:01.891161+00:00"
 }

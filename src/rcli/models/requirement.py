@@ -19,6 +19,7 @@ class Requirement:
     priority: str = "medium"
     parent: str | None = None
     labels: list[str] = field(default_factory=list)
+    depends_on: list[str] = field(default_factory=list)
     metadata: dict[str, str] = field(default_factory=dict)
     created_at: str = ""
     updated_at: str = ""
@@ -39,6 +40,7 @@ class Requirement:
             "priority": self.priority,
             "parent": self.parent,
             "labels": self.labels,
+            "depends_on": self.depends_on,
             "metadata": self.metadata,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
@@ -54,6 +56,7 @@ class Requirement:
             priority=data.get("priority", "medium"),
             parent=data.get("parent"),
             labels=data.get("labels", []),
+            depends_on=data.get("depends_on", []),
             metadata=data.get("metadata", {}),
             created_at=data.get("created_at", ""),
             updated_at=data.get("updated_at", ""),

@@ -64,6 +64,8 @@ class HtmlFormatter:
             parts.append(f'<p>Parent: {_esc(req.parent)}</p>')
         if req.labels:
             parts.append(f'<p>Labels: {_esc(", ".join(req.labels))}</p>')
+        if req.depends_on:
+            parts.append(f'<p>Depends On: {_esc(", ".join(req.depends_on))}</p>')
         if req.description:
             parts.append(f'<p>{_esc(req.description)}</p>')
         parts.append(f'<p class="meta">Created: {_esc(req.created_at)} | Updated: {_esc(req.updated_at)}</p>')
@@ -120,6 +122,33 @@ class HtmlFormatter:
             for key, val in section_data.items():
                 parts.append(f"<li>{_esc(key)}: {val}</li>")
             parts.append("</ul>")
+        parts.append("</body></html>\n")
+        sys.stdout.write("\n".join(parts))
+
+    def output_graph(self, requirements: list) -> None:
+        deps = [r for r in requirements if r.depends_on]
+        parts = [f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>Dependency Graph</title>{CSS}</head><body>"]
+        parts.append("<h1>Dependency Graph</h1>")
+        if not deps:
+            parts.append("<p><em>No dependencies defined.</em></p>")
+        else:
+            parts.append("<table><tr><th>ID</th><th>Title</th><th>Depends On</th></tr>")
+            for req in deps:
+                parts.append(f"<tr><td>{_esc(req.id)}</td><td>{_esc(req.title)}</td><td>{_esc(', '.join(req.depends_on))}</td></tr>")
+            parts.append("</table>")
+        parts.append("</body></html>\n")
+        sys.stdout.write("\n".join(parts))
+
+    def output_lint(self, issues: list[dict]) -> None:
+        parts = [f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>Lint Issues</title>{CSS}</head><body>"]
+        parts.append("<h1>Lint Issues</h1>")
+        if not issues:
+            parts.append("<p>No issues found.</p>")
+        else:
+            parts.append("<table><tr><th>Type</th><th>Message</th></tr>")
+            for issue in issues:
+                parts.append(f"<tr><td>{_esc(issue['type'])}</td><td>{_esc(issue['message'])}</td></tr>")
+            parts.append("</table>")
         parts.append("</body></html>\n")
         sys.stdout.write("\n".join(parts))
 

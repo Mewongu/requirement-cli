@@ -12,7 +12,7 @@ from rcli.commands.json_input import (
     parse_metadata, apply_metadata_edits, apply_list_edits, validate_enum,
 )
 from rcli.models.requirement import Requirement, VALID_STATUSES, VALID_PRIORITIES
-from rcli.search_engine import filter_items
+from rcli.search_engine import filter_items, find_cycles
 
 
 @click.group()
@@ -30,12 +30,13 @@ def req() -> None:
 @click.option("--label", multiple=True, help="Labels (repeatable).")
 @click.option("--meta", multiple=True, help="Metadata KEY=VALUE (repeatable).")
 @click.option("--prefix", default=None, help="ID prefix (default: from metadata).")
+@click.option("--depends-on", "dep_ids", multiple=True, help="Dependency requirement IDs (repeatable).")
 @click.option("--json", "json_input", default=None, help="JSON object with fields (inline or '-' for stdin).")
 @click.pass_context
 def req_add(ctx: click.Context, title: str | None, description: str | None,
             status: str | None, priority: str | None, parent: str | None,
             label: tuple, meta: tuple, prefix: str | None,
-            json_input: str | None) -> None:
+            dep_ids: tuple, json_input: str | None) -> None:
     """Add a new requirement."""
     json_data = parse_json_input(json_input, ctx)
 
@@ -61,6 +62,7 @@ def req_add(ctx: click.Context, title: str | None, description: str | None,
 
     # Labels: CLI flags win, else JSON, else empty
     final_labels = list(label) if label else (json_data.get("labels", []) if json_data else [])
+    final_depends_on = list(dep_ids) if dep_ids else (json_data.get("depends_on", []) if json_data else [])
 
     meta_dict = parse_metadata(meta, json_data, ctx)
     if meta_dict is None:
@@ -74,9 +76,17 @@ def req_add(ctx: click.Context, title: str | None, description: str | None,
         priority=final_priority,
         parent=final_parent,
         labels=final_labels,
+        depends_on=final_depends_on,
         metadata=meta_dict,
     )
     store.save_requirement(requirement)
+
+    if final_depends_on:
+        all_reqs = store.list_requirements()
+        cycles = find_cycles(all_reqs)
+        for cycle in cycles:
+            if req_id in cycle:
+                click.echo(f"Warning: dependency cycle detected: {' → '.join(cycle)}", err=True)
 
     fmt = get_formatter(ctx)
     fmt.output_message(f"Created {req_id}: {final_title}", requirement)
@@ -104,9 +114,10 @@ def req_show(ctx: click.Context, id: str) -> None:
 @click.option("--parent", default=None, help="Filter by parent ID.")
 @click.option("--priority", multiple=True, type=click.Choice(VALID_PRIORITIES), help="Filter by priority (repeatable).")
 @click.option("--orphans", is_flag=True, help="Show only root requirements (no parent).")
+@click.option("--depends-on", "dep_filter", multiple=True, help="Filter by direct dependency ID (repeatable).")
 @click.pass_context
 def req_list(ctx: click.Context, status: tuple, label: tuple, prefix: str | None,
-             parent: str | None, priority: tuple, orphans: bool) -> None:
+             parent: str | None, priority: tuple, orphans: bool, dep_filter: tuple) -> None:
     """List requirements with optional filters."""
     store = get_store(ctx)
     reqs = store.list_requirements()
@@ -118,6 +129,7 @@ def req_list(ctx: click.Context, status: tuple, label: tuple, prefix: str | None
         parent=parent,
         priorities=list(priority) or None,
         orphans=orphans,
+        depends_on_ids=list(dep_filter) or None,
     )
     fmt = get_formatter(ctx)
     fmt.output_list(reqs)
@@ -133,6 +145,8 @@ def req_list(ctx: click.Context, status: tuple, label: tuple, prefix: str | None
 @click.option("--clear-parent", is_flag=True, help="Remove parent.")
 @click.option("--add-label", multiple=True, help="Add label.")
 @click.option("--remove-label", multiple=True, help="Remove label.")
+@click.option("--add-dep", multiple=True, help="Add dependency ID.")
+@click.option("--remove-dep", multiple=True, help="Remove dependency ID.")
 @click.option("--set-meta", multiple=True, help="Set metadata KEY=VALUE.")
 @click.option("--remove-meta", multiple=True, help="Remove metadata key.")
 @click.option("--json", "json_input", default=None, help="JSON object with fields (inline or '-' for stdin).")
@@ -140,6 +154,7 @@ def req_list(ctx: click.Context, status: tuple, label: tuple, prefix: str | None
 def req_edit(ctx: click.Context, id: str, title: str | None, description: str | None,
              status: str | None, priority: str | None, parent: str | None,
              clear_parent: bool, add_label: tuple, remove_label: tuple,
+             add_dep: tuple, remove_dep: tuple,
              set_meta: tuple, remove_meta: tuple, json_input: str | None) -> None:
     """Edit an existing requirement."""
     json_data = parse_json_input(json_input, ctx)
@@ -180,6 +195,12 @@ def req_edit(ctx: click.Context, id: str, title: str | None, description: str | 
     elif json_data and "labels" in json_data:
         requirement.labels = list(json_data["labels"])
 
+    # Depends-on: CLI --add-dep/--remove-dep win; else JSON replaces list
+    if add_dep or remove_dep:
+        apply_list_edits(requirement.depends_on, add_dep, remove_dep)
+    elif json_data and "depends_on" in json_data:
+        requirement.depends_on = list(json_data["depends_on"])
+
     # Metadata: CLI --set-meta/--remove-meta win; else JSON replaces dict
     result = apply_metadata_edits(requirement.metadata, set_meta, remove_meta, json_data, ctx)
     if result is None:
@@ -188,6 +209,13 @@ def req_edit(ctx: click.Context, id: str, title: str | None, description: str | 
 
     requirement.updated_at = datetime.now(timezone.utc).isoformat()
     store.save_requirement(requirement)
+
+    if requirement.depends_on:
+        all_reqs = store.list_requirements()
+        cycles = find_cycles(all_reqs)
+        for cycle in cycles:
+            if id in cycle:
+                click.echo(f"Warning: dependency cycle detected: {' → '.join(cycle)}", err=True)
 
     fmt = get_formatter(ctx)
     fmt.output_message(f"Updated {id}", requirement)
@@ -237,3 +265,13 @@ def req_tree(ctx: click.Context, id: str | None) -> None:
 
     fmt = get_formatter(ctx)
     fmt.output_tree(reqs)
+
+
+@req.command("graph")
+@click.pass_context
+def req_graph(ctx: click.Context) -> None:
+    """Show dependency DAG (requirements with depends_on links)."""
+    store = get_store(ctx)
+    reqs = store.list_requirements()
+    fmt = get_formatter(ctx)
+    fmt.output_graph(reqs)

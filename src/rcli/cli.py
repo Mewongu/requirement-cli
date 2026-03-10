@@ -59,6 +59,8 @@ from rcli.commands.decision import decision
 from rcli.commands.search import search_cmd
 from rcli.commands.export import export_cmd
 from rcli.commands.status import status_cmd
+from rcli.commands.impact import impact_cmd
+from rcli.commands.lint import lint_cmd
 
 cli.add_command(init_cmd, "init")
 cli.add_command(req, "req")
@@ -66,3 +68,5 @@ cli.add_command(decision, "decision")
 cli.add_command(search_cmd, "search")
 cli.add_command(export_cmd, "export")
 cli.add_command(status_cmd, "status")
+cli.add_command(impact_cmd, "impact")
+cli.add_command(lint_cmd, "lint")
