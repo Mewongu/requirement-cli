@@ -121,6 +121,25 @@ class TestFilter:
         assert len(result) == 1
         assert result[0].id == "REQ-1"
 
+    def test_filter_by_links(self):
+        items = [
+            Decision(id="ADR-1", title="A", linked_requirements=["REQ-1"]),
+            Decision(id="ADR-2", title="B", linked_requirements=["REQ-2"]),
+            Decision(id="ADR-3", title="C", linked_requirements=[]),
+        ]
+        result = filter_items(items, links=["REQ-1"])
+        assert len(result) == 1
+        assert result[0].id == "ADR-1"
+
+    def test_filter_by_links_multiple(self):
+        items = [
+            Decision(id="ADR-1", title="A", linked_requirements=["REQ-1"]),
+            Decision(id="ADR-2", title="B", linked_requirements=["REQ-2"]),
+            Decision(id="ADR-3", title="C", linked_requirements=[]),
+        ]
+        result = filter_items(items, links=["REQ-1", "REQ-2"])
+        assert len(result) == 2
+
     def test_filter_combined(self):
         """Multiple filter types are AND'd."""
         items = [

@@ -42,6 +42,7 @@ def filter_items(
     parent: str | None = None,
     priorities: list[str] | None = None,
     orphans: bool = False,
+    links: list[str] | None = None,
 ) -> list:
     """Filter items. Multiple values within a type are OR'd, across types are AND'd."""
     result = items
@@ -49,6 +50,8 @@ def filter_items(
         result = [i for i in result if i.status in statuses]
     if labels:
         result = [i for i in result if hasattr(i, "labels") and any(l in i.labels for l in labels)]
+    if links:
+        result = [i for i in result if hasattr(i, "linked_requirements") and any(l in i.linked_requirements for l in links)]
     if prefix:
         result = [i for i in result if i.id.startswith(prefix + "-")]
     if parent is not None:

@@ -96,10 +96,10 @@ def decision_show(ctx: click.Context, id: str) -> None:
 
 @decision.command("list")
 @click.option("--status", multiple=True, type=click.Choice(VALID_STATUSES), help="Filter by status.")
-@click.option("--label", multiple=True, help="Filter by linked requirement.")
+@click.option("--link", multiple=True, help="Filter by linked requirement ID (repeatable).")
 @click.option("--prefix", default=None, help="Filter by ID prefix.")
 @click.pass_context
-def decision_list(ctx: click.Context, status: tuple, label: tuple,
+def decision_list(ctx: click.Context, status: tuple, link: tuple,
                   prefix: str | None) -> None:
     """List decisions with optional filters."""
     store = get_store(ctx)
@@ -108,6 +108,7 @@ def decision_list(ctx: click.Context, status: tuple, label: tuple,
         decs,
         statuses=list(status) or None,
         prefix=prefix,
+        links=list(link) or None,
     )
     fmt = get_formatter(ctx)
     fmt.output_list(decs)

@@ -89,6 +89,29 @@ class TestDecisionList:
         assert len(data) == 1
         assert data[0]["status"] == "active"
 
+    def test_list_filter_link(self, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        runner = CliRunner()
+        init_project(runner, tmp_path)
+        runner.invoke(cli, ["decision", "add", "A", "--link", "REQ-1"])
+        runner.invoke(cli, ["decision", "add", "B", "--link", "REQ-2"])
+        runner.invoke(cli, ["decision", "add", "C"])
+        result = runner.invoke(cli, ["--format", "json", "decision", "list", "--link", "REQ-1"])
+        data = json.loads(result.output)
+        assert len(data) == 1
+        assert data[0]["title"] == "A"
+
+    def test_list_filter_link_multiple(self, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+        runner = CliRunner()
+        init_project(runner, tmp_path)
+        runner.invoke(cli, ["decision", "add", "A", "--link", "REQ-1"])
+        runner.invoke(cli, ["decision", "add", "B", "--link", "REQ-2"])
+        runner.invoke(cli, ["decision", "add", "C"])
+        result = runner.invoke(cli, ["--format", "json", "decision", "list", "--link", "REQ-1", "--link", "REQ-2"])
+        data = json.loads(result.output)
+        assert len(data) == 2
+
 
 class TestDecisionEdit:
     def test_edit(self, tmp_path, monkeypatch):

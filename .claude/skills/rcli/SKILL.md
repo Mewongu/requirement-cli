@@ -65,6 +65,7 @@ rcli decision add --json '{"title":"Title","context":"Why","decision":"What","li
 # List decisions
 rcli decision list
 rcli decision list --status active
+rcli decision list --link REQ-1
 
 # Show a decision
 rcli decision show ADR-1
