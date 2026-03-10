@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "Bash(grep:*)",
       "WebFetch(domain:click.palletsprojects.com)",
       "WebFetch(domain:rich.readthedocs.io)",
       "Bash(git init:*)",
@@ -9,7 +10,33 @@
       "Bash(git mv:*)",
       "Bash(git status:*)",
       "Bash(git push:*)",
-      "Bash(source .venv/bin/activate 2>/dev/null || true && which rcli || python -m rcli --help 2>&1 | head -5)"
+      "Bash(source .venv/bin/activate 2>/dev/null || true && which rcli || python -m rcli --help 2>&1 | head -5)",
+      "Bash(file /Users/andreas/Projects/cc_req/.rcli/requirements/*.json | head -20)",
+      "Bash(grep -rlU $'\\\\r' /Users/andreas/Projects/cc_req/.rcli/ /Users/andreas/Projects/cc_req/src/ 2>/dev/null | head -10)",
+      "Bash(.venv/bin/python -m pytest tests/test_cli_init.py -v 2>&1)",
+      "Bash(.venv/bin/python -m pytest --tb=short 2>&1)",
+      "Bash(.venv/bin/rcli search:*)",
+      "Bash(.venv/bin/rcli --format json req list)",
+      "Bash(.venv/bin/rcli --format json decision list)",
+      "Bash(.venv/bin/rcli --format json req edit REQ-8 \\\\\n  --json '{\"title\":\"Agent Skills Integration\",\"description\":\"Generate a standard Agent Skills SKILL.md \\(agentskills.io\\) at .agents/skills/rcli/SKILL.md by default. The location is configurable via --skill-dir. This makes the skill discoverable by all compatible agents \\(Claude Code, OpenCode, Codex, Gemini CLI, etc.\\) without tool-specific configuration.\",\"labels\":[\"integration\"]}')",
+      "Bash(git add:*)",
+      "Bash(rcli search:*)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Read(//Users/andreas/Projects/cc_req/**)",
+      "Bash(done)",
+      "Bash(.venv/bin/python -m pytest tests/ -q 2>&1 | tail -20)",
+      "Bash(wc -l /Users/andreas/Projects/cc_req/src/rcli/**/*.py)",
+      "Bash(grep -n \"output_message\\\\|output_item\\\\|output_list\\\\|output_tree\\\\|output_search\\\\|output_status\" /Users/andreas/Projects/cc_req/src/rcli/formatters/*.py | head -40)",
+      "Bash(grep -n \"if isinstance.*Requirement\\\\|if isinstance.*Decision\" /Users/andreas/Projects/cc_req/src/rcli/formatters/*.py)",
+      "Bash(grep -n \"def _build_tree\\\\|children.setdefault\\\\|by_id = \" /Users/andreas/Projects/cc_req/src/rcli/formatters/*.py /Users/andreas/Projects/cc_req/src/rcli/commands/*.py)",
+      "Bash(.venv/bin/python -m pytest --tb=short -q 2>&1)",
+      "Bash(.venv/bin/python -m pytest tests/ -v --tb=short 2>&1 | tail -80)",
+      "Bash(.venv/bin/rcli decision:*)",
+      "Bash(.venv/bin/rcli req:*)",
+      "Bash(.venv/bin/python -m pytest tests/ -v --tb=short 2>&1 | tail -20)",
+      "Bash(.venv/bin/python -m pytest tests/test_cli_init.py -v --tb=short 2>&1)",
+      "Bash(source .venv/bin/activate && rcli req list && rcli decision list)"
     ]
   }
 }

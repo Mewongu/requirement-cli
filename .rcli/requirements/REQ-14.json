@@ -1,0 +1,15 @@
+{
+  "id": "REQ-14",
+  "title": "Dependency tracking on requirements",
+  "description": "Requirements support a depends_on field (list of requirement IDs) expressing lateral dependencies. A requirement A depends_on B means B must be satisfied before A. Storage is forward-only: only the dependent stores the reference.",
+  "status": "draft",
+  "priority": "high",
+  "parent": null,
+  "labels": [
+    "core",
+    "design"
+  ],
+  "metadata": {},
+  "created_at": "2026-03-10T20:32:44.001603+00:00",
+  "updated_at": "2026-03-10T20:32:44.001603+00:00"
+}

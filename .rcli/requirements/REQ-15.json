@@ -1,0 +1,15 @@
+{
+  "id": "REQ-15",
+  "title": "Impact analysis command",
+  "description": "rcli impact REQ-X shows all requirements that directly or transitively depend on REQ-X. Traversal is reverse of the depends_on graph.",
+  "status": "draft",
+  "priority": "high",
+  "parent": null,
+  "labels": [
+    "cli",
+    "core"
+  ],
+  "metadata": {},
+  "created_at": "2026-03-10T20:32:44.064059+00:00",
+  "updated_at": "2026-03-10T20:32:44.064059+00:00"
+}

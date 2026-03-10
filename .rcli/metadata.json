@@ -2,8 +2,8 @@
   "version": "1",
   "project_name": "rcli",
   "counters": {
-    "REQ": 13,
-    "ADR": 3
+    "REQ": 18,
+    "ADR": 4
   },
   "default_requirement_prefix": "REQ",
   "default_decision_prefix": "ADR"

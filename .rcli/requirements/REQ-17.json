@@ -1,0 +1,14 @@
+{
+  "id": "REQ-17",
+  "title": "rcli lint command",
+  "description": "rcli lint reports structural issues across the requirement graph: cyclic dependencies, dangling depends_on references, dangling parent references. Exits non-zero if issues are found.",
+  "status": "draft",
+  "priority": "medium",
+  "parent": null,
+  "labels": [
+    "cli"
+  ],
+  "metadata": {},
+  "created_at": "2026-03-10T20:32:44.187532+00:00",
+  "updated_at": "2026-03-10T20:32:44.187532+00:00"
+}
