@@ -1,0 +1,15 @@
+{
+  "id": "ADR-2",
+  "title": "Parent and linked requirement IDs are not validated on write",
+  "context": "When setting --parent on a requirement or --link on a decision, the referenced ID may not exist in the store. The tool could reject unknown IDs or silently accept them.",
+  "decision": "Accept any string as a parent or linked requirement ID without checking existence.",
+  "rationale": "Permissive references allow forward-referencing (creating a child before its parent), bulk imports, and cross-prefix references. Dangling references are visible on list/tree/export and can be resolved by the user. Strict validation would require a full scan on every write and would break legitimate workflows.",
+  "status": "active",
+  "linked_requirements": [
+    "REQ-3",
+    "REQ-4"
+  ],
+  "metadata": {},
+  "created_at": "2026-03-10T13:29:00.845979+00:00",
+  "updated_at": "2026-03-10T13:29:00.845979+00:00"
+}
