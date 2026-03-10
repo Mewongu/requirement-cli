@@ -17,7 +17,8 @@ You are managing project requirements and design decisions using the `rcli` CLI 
 ### Initialize
 ```bash
 rcli init --name "project-name"
-rcli init --name "project-name" --tool claude --tool codex --tool opencode
+rcli init --name "project-name" --skill-dir .agents/skills
+rcli init --name "project-name" --skill-dir .claude/skills
 ```
 
 ### Requirements

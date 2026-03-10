@@ -8,55 +8,31 @@ import click
 
 from rcli.cli import get_formatter
 from rcli.storage.store import Store
-from rcli.skill import (
-    generate_skill_content,
-    generate_agents_content,
-    generate_opencode_content,
-    merge_into_existing,
-)
+from rcli.skill import generate_skill_content
 
-TOOL_CHOICES = ("claude", "codex", "opencode")
+DEFAULT_SKILL_DIR = ".agents/skills"
 
 
 @click.command("init")
 @click.option("--name", default="", help="Project name.")
 @click.option(
-    "--tool",
-    "tools",
-    multiple=True,
-    type=click.Choice(TOOL_CHOICES, case_sensitive=False),
-    help="AI tools to generate instruction files for. Defaults to claude only. Can be specified multiple times.",
+    "--skill-dir",
+    default=DEFAULT_SKILL_DIR,
+    show_default=True,
+    help="Directory to write the SKILL.md file into (e.g. .agents/skills or .claude/skills).",
 )
 @click.pass_context
-def init_cmd(ctx: click.Context, name: str, tools: tuple[str, ...]) -> None:
+def init_cmd(ctx: click.Context, name: str, skill_dir: str) -> None:
     """Initialize a .rcli/ directory in the current project."""
     rcli_path = Path.cwd() / ".rcli"
     store = Store(rcli_path)
     store.init_project(project_name=name)
 
-    if not tools:
-        tools = ("claude",)
-
-    for tool in tools:
-        if tool == "claude":
-            claude_dir = Path.cwd() / ".claude" / "skills" / "rcli"
-            claude_dir.mkdir(parents=True, exist_ok=True)
-            (claude_dir / "SKILL.md").write_text(generate_skill_content())
-        elif tool == "codex":
-            _write_or_merge(Path.cwd() / "AGENTS.md", generate_agents_content())
-        elif tool == "opencode":
-            _write_or_merge(Path.cwd() / "OPENCODE.md", generate_opencode_content())
+    skill_path = Path.cwd() / skill_dir / "rcli"
+    skill_path.mkdir(parents=True, exist_ok=True)
+    (skill_path / "SKILL.md").write_text(generate_skill_content())
 
     fmt = get_formatter(ctx)
     fmt.output_message(
         f"Initialized rcli in {rcli_path}",
     )
-
-
-def _write_or_merge(path: Path, content: str) -> None:
-    """Write content to a file, merging with existing content if present."""
-    if path.exists():
-        existing = path.read_text()
-        path.write_text(merge_into_existing(existing, content))
-    else:
-        path.write_text(content)
