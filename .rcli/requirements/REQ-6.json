@@ -1,7 +1,7 @@
 {
   "id": "REQ-6",
   "title": "Multiple Output Formats",
-  "description": "Support table, JSON, markdown, and HTML output formats via --format flag.",
+  "description": "Support table, JSON, markdown, and HTML output formats via --format flag. Default format is JSON — the tool is AI-first, human-second.",
   "status": "implemented",
   "priority": "high",
   "parent": null,

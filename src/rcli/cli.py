@@ -24,7 +24,7 @@ FORMATTERS = {
 
 def get_formatter(ctx: click.Context):
     """Get the formatter instance from the context."""
-    fmt = ctx.find_root().params.get("format", "table")
+    fmt = ctx.find_root().params.get("format", "json")
     return FORMATTERS[fmt]()
 
 
@@ -44,7 +44,7 @@ def error_exit(ctx: click.Context, message: str) -> None:
 
 
 @click.group()
-@click.option("--format", "format", type=click.Choice(["table", "json", "markdown", "html"]), default="table", help="Output format.")
+@click.option("--format", "format", type=click.Choice(["table", "json", "markdown", "html"]), default="json", help="Output format.")
 @click.pass_context
 def cli(ctx: click.Context, format: str) -> None:
     """rcli - Requirement CLI."""
